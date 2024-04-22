@@ -1,0 +1,23 @@
+[package]
+name = "early_console"
+version = "0.1.0"
+edition = "2021"
+authors = ["Yuekai Jia <equation618@gmail.com>"]
+description = "ArceOS hardware abstraction layer, provides unified APIs for platform-specific operations"
+license = "GPL-3.0-or-later OR Apache-2.0"
+
+[features]
+monolithic = []
+default = []
+
+[dependencies]
+log = "0.4"
+cfg-if = "1.0"
+axconfig = { git = "ssh://git@github.com/shilei-massclouds/axconfig.git" }
+
+[target.'cfg(any(target_arch = "riscv32", target_arch = "riscv64"))'.dependencies]
+riscv = "0.10"
+sbi-rt = { version = "0.0.2", features = ["legacy"] }
+
+[build-dependencies]
+axconfig = { git = "ssh://git@github.com/shilei-massclouds/axconfig.git" }
