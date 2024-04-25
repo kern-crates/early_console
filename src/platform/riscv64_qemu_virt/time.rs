@@ -1,6 +1,8 @@
 use riscv::register::time;
 
-const NANOS_PER_TICK: u64 = crate::time::NANOS_PER_SEC / axconfig::TIMER_FREQUENCY as u64;
+/// Number of nanoseconds in a second.
+const NANOS_PER_SEC: u64 = 1_000_000_000;
+const NANOS_PER_TICK: u64 = NANOS_PER_SEC / axconfig::TIMER_FREQUENCY as u64;
 
 /// Returns the current clock time in hardware ticks.
 #[inline]

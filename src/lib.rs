@@ -3,12 +3,16 @@
 mod platform;
 mod time;
 
+pub fn init() {
+    platform::console_init();
+}
+
 /// Write a slice of bytes to the console.
 pub fn write_bytes(bytes: &[u8]) {
     for c in bytes {
         platform::putchar(*c);
     }
-    sbi_rt::system_reset(sbi_rt::Shutdown, sbi_rt::NoReason);
+    platform::terminate();
 }
 
 pub fn time() -> core::time::Duration {
