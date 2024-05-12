@@ -1,12 +1,34 @@
 //! Uart 16550.
 
-use spinbase::SpinNoIrq;
+use core::cell::{RefCell, RefMut};
 use x86_64::instructions::port::{Port, PortReadOnly, PortWriteOnly};
 
 const UART_CLOCK_FACTOR: usize = 16;
 const OSC_FREQ: usize = 1_843_200;
 
-static COM1: SpinNoIrq<Uart16550> = SpinNoIrq::new(Uart16550::new(0x3f8));
+/// Safety:
+/// EarlyCon only can be used in early-stage of boot.
+/// At that time, there's only one running thread.
+/// When entering multi-task, disable earlycon and switch to formal console.
+struct EarlyCon {
+    inner: RefCell<Uart16550>,
+}
+
+impl EarlyCon {
+    pub const fn new() -> Self {
+        Self {
+            inner: RefCell::new(Uart16550::new(0x3f8)),
+        }
+    }
+
+    pub fn get_mut(&self) -> RefMut<'_, Uart16550> {
+        self.inner.borrow_mut()
+    }
+}
+
+unsafe impl Sync for EarlyCon {}
+
+static COM1: EarlyCon = EarlyCon::new();
 
 bitflags::bitflags! {
     /// Line status flags
@@ -73,20 +95,11 @@ impl Uart16550 {
         while !self.line_sts().contains(LineStsFlags::OUTPUT_EMPTY) {}
         unsafe { self.data.write(c) };
     }
-
-    #[allow(unused)]
-    fn getchar(&mut self) -> Option<u8> {
-        if self.line_sts().contains(LineStsFlags::INPUT_FULL) {
-            unsafe { Some(self.data.read()) }
-        } else {
-            None
-        }
-    }
 }
 
 /// Writes a byte to the console.
 pub fn putchar(c: u8) {
-    let mut uart = COM1.lock();
+    let mut uart = COM1.get_mut();
     match c {
         b'\n' => {
             uart.putchar(b'\r');
@@ -96,12 +109,6 @@ pub fn putchar(c: u8) {
     }
 }
 
-/// Reads a byte from the console, or returns [`None`] if no input is available.
-#[allow(unused)]
-pub fn getchar() -> Option<u8> {
-    COM1.lock().getchar()
-}
-
 pub fn console_init() {
-    COM1.lock().init(115200);
+    COM1.get_mut().init(115200);
 }

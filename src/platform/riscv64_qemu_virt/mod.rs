@@ -1,5 +1,3 @@
-pub mod time;
-
 pub fn console_init() {
 }
 

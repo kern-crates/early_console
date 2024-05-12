@@ -1,7 +1,7 @@
 #![no_std]
+#![feature(exclusive_wrapper)]
 
 mod platform;
-mod time;
 
 pub fn init() {
     platform::console_init();
@@ -13,16 +13,4 @@ pub fn write_bytes(bytes: &[u8]) {
         platform::putchar(*c);
     }
     platform::terminate();
-}
-
-pub fn time() -> core::time::Duration {
-    time::current_time()
-}
-
-pub fn cpu_id() -> Option<usize> {
-    None
-}
-
-pub fn task_id() -> Option<u64> {
-    None
 }
