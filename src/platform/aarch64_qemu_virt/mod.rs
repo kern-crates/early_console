@@ -1,12 +1,13 @@
-use core::cell::{RefCell, RefMut};
 use arm_pl011::pl011::Pl011Uart;
+use crate::earlydev::EarlyDev;
 
 pub const PSCI_0_2_FN_BASE: u32 = 0x84000000;
 pub const PSCI_0_2_FN_SYSTEM_OFF: u32 = PSCI_0_2_FN_BASE + 8;
 
 const UART_BASE: usize = axconfig::UART_PADDR + axconfig::PHYS_VIRT_OFFSET;
 
-static UART: EarlyCon = EarlyCon::new();
+static UART: EarlyDev<Pl011Uart> =
+    EarlyDev::new(Pl011Uart::new(UART_BASE as *mut u8));
 
 pub fn console_init() {
     UART.get_mut().init();
@@ -33,25 +34,3 @@ pub fn terminate() -> ! {
     }
     loop {}
 }
-
-/// Safety:
-/// EarlyCon only can be used in early-stage of boot.
-/// At that time, there's only one running thread.
-/// When entering multi-task, disable earlycon and switch to formal console.
-struct EarlyCon {
-    inner: RefCell<Pl011Uart>,
-}
-
-impl EarlyCon {
-    pub const fn new() -> Self {
-        Self {
-            inner: RefCell::new(Pl011Uart::new(UART_BASE as *mut u8)),
-        }
-    }
-
-    pub fn get_mut(&self) -> RefMut<'_, Pl011Uart> {
-        self.inner.borrow_mut()
-    }
-}
-
-unsafe impl Sync for EarlyCon {}

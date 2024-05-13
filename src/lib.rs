@@ -1,6 +1,8 @@
 #![no_std]
 #![feature(exclusive_wrapper)]
 
+#[allow(dead_code)]
+mod earlydev;
 mod platform;
 
 pub fn init() {

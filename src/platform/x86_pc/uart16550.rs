@@ -1,34 +1,12 @@
 //! Uart 16550.
 
-use core::cell::{RefCell, RefMut};
 use x86_64::instructions::port::{Port, PortReadOnly, PortWriteOnly};
+use crate::earlydev::EarlyDev;
 
 const UART_CLOCK_FACTOR: usize = 16;
 const OSC_FREQ: usize = 1_843_200;
 
-/// Safety:
-/// EarlyCon only can be used in early-stage of boot.
-/// At that time, there's only one running thread.
-/// When entering multi-task, disable earlycon and switch to formal console.
-struct EarlyCon {
-    inner: RefCell<Uart16550>,
-}
-
-impl EarlyCon {
-    pub const fn new() -> Self {
-        Self {
-            inner: RefCell::new(Uart16550::new(0x3f8)),
-        }
-    }
-
-    pub fn get_mut(&self) -> RefMut<'_, Uart16550> {
-        self.inner.borrow_mut()
-    }
-}
-
-unsafe impl Sync for EarlyCon {}
-
-static COM1: EarlyCon = EarlyCon::new();
+static COM1: EarlyDev<Uart16550> = EarlyDev::new(Uart16550::new(0x3f8));
 
 bitflags::bitflags! {
     /// Line status flags
