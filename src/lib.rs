@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(not(target_os = "linux"), no_std)]
 #![feature(exclusive_wrapper)]
 
 #[allow(dead_code)]

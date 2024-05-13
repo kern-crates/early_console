@@ -14,7 +14,7 @@ cfg_if::cfg_if! {
         mod loongarch64_qemu_virt;
         pub use self::loongarch64_qemu_virt::*;
     } else {
-        mod dummy;
-        pub use self::dummy::*;
+        mod um;
+        pub use self::um::*;
     }
 }
