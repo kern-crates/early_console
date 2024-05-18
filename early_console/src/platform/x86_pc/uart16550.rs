@@ -1,12 +1,12 @@
 //! Uart 16550.
 
+use spinbase::SpinNoIrq;
 use x86_64::instructions::port::{Port, PortReadOnly, PortWriteOnly};
-use crate::earlydev::EarlyDev;
 
 const UART_CLOCK_FACTOR: usize = 16;
 const OSC_FREQ: usize = 1_843_200;
 
-static COM1: EarlyDev<Uart16550> = EarlyDev::new(Uart16550::new(0x3f8));
+static COM1: SpinNoIrq<Uart16550> = SpinNoIrq::new(Uart16550::new(0x3f8));
 
 bitflags::bitflags! {
     /// Line status flags
@@ -73,11 +73,20 @@ impl Uart16550 {
         while !self.line_sts().contains(LineStsFlags::OUTPUT_EMPTY) {}
         unsafe { self.data.write(c) };
     }
+
+    #[allow(unused)]
+    fn getchar(&mut self) -> Option<u8> {
+        if self.line_sts().contains(LineStsFlags::INPUT_FULL) {
+            unsafe { Some(self.data.read()) }
+        } else {
+            None
+        }
+    }
 }
 
 /// Writes a byte to the console.
 pub fn putchar(c: u8) {
-    let mut uart = COM1.get_mut();
+    let mut uart = COM1.lock();
     match c {
         b'\n' => {
             uart.putchar(b'\r');
@@ -87,6 +96,11 @@ pub fn putchar(c: u8) {
     }
 }
 
+/// Reads a byte from the console, or returns [`None`] if no input is available.
+pub fn getchar() -> Option<u8> {
+    COM1.lock().getchar()
+}
+
 pub fn console_init() {
-    COM1.get_mut().init(115200);
+    COM1.lock().init(115200);
 }

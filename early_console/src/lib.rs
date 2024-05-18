@@ -1,11 +1,12 @@
-#![cfg_attr(not(target_os = "linux"), no_std)]
-#![feature(exclusive_wrapper)]
+#![no_std]
 
-#[allow(dead_code)]
-mod earlydev;
 mod platform;
+mod time;
+
+pub use platform::{getchar, putchar};
 
 pub fn init() {
+    #[cfg(target_arch = "x86_64")]
     platform::console_init();
 }
 
@@ -14,5 +15,16 @@ pub fn write_bytes(bytes: &[u8]) {
     for c in bytes {
         platform::putchar(*c);
     }
-    platform::terminate();
+}
+
+pub fn time() -> core::time::Duration {
+    time::current_time()
+}
+
+pub fn cpu_id() -> Option<usize> {
+    None
+}
+
+pub fn task_id() -> Option<u64> {
+    None
 }
