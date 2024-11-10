@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = [
+    "early_console",
+    "rt_early_console",
+]
+
+[profile.release]
+lto = true
