@@ -2,9 +2,10 @@
   "name": "early_console",
   "description": "Boot early-stage console.",
   "authors": [{
-    "name": "Yuekai Jia",
-    "email": "equation618@gmail.com"
+    "name": "Shi Lei",
+    "email": "shi_lei@massclouds.com"
   }],
   "keywords": ["console", "boot"],
-  "repo": "shilei-massclouds/early_console"
+  "repo": "shilei-massclouds/early_console",
+  "doc_url": "https://github.com/shilei-massclouds/early_console/blob/main/README.md"
 }
